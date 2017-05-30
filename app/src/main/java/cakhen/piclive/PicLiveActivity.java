@@ -1,5 +1,6 @@
 package cakhen.piclive;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -21,6 +22,8 @@ public class PicLiveActivity extends AppCompatActivity {
                     mTextMessage.setText(R.string.title_home);
                     return true;
                 case R.id.navigation_dashboard:
+                    Intent i = new Intent(PicLiveActivity.this, CameraActivity.class);
+                    startActivity(i);
                     mTextMessage.setText(R.string.title_dashboard);
                     return true;
                 case R.id.navigation_notifications:

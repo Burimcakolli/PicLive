@@ -36,6 +36,13 @@
             android:background="@drawable/rounded_button"
             />
         <Button
+            android:id="@+id/button_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/ic_arrow_back_white_24dp"
+            android:onClick="goBack"
+            />
+        <Button
             android:id="@+id/button_swap"
             android:layout_width="30dp"
             android:layout_height="30dp"

@@ -21,15 +21,20 @@ import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
+import java.security.Policy;
+
+import static android.hardware.Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE;
+
 
 public class CameraActivity extends AppCompatActivity {
     Camera mCamera;
     FrameLayout preview;
     CameraPreview mPreview;
-
+    Camera.Parameters params;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         getSupportActionBar().hide();
         super.onCreate(savedInstanceState);
         Window window = getWindow();
@@ -44,8 +49,12 @@ public class CameraActivity extends AppCompatActivity {
         if(hasPerm != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1234);
         }
+
         mCamera = getCameraInstance(0);
         mCamera.setDisplayOrientation(90);
+        params = mCamera.getParameters();
+        params.setFocusMode(FOCUS_MODE_CONTINUOUS_PICTURE);
+        mCamera.setParameters(params);
         mPreview = new CameraPreview(this, mCamera, this);
         preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
@@ -53,20 +62,25 @@ public class CameraActivity extends AppCompatActivity {
         Button button = (Button) findViewById(R.id.button_capture);
         button.bringToFront();
 
+        Button back = (Button)findViewById(R.id.button_back);
+        back.bringToFront();
+
+
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
 
     }
 
-
+    public void goBack(View view){
+    finish();
+    }
 
     public void switchCamera(View view){
         mPreview.swapCamera(view);
-        RotateAnimation rotate = new RotateAnimation(0, 180, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        RotateAnimation rotate = new RotateAnimation(180, 0, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         rotate.setDuration(750);
         rotate.setInterpolator(new LinearInterpolator());
-
         Button swap= (Button) findViewById(R.id.button_swap);
 
         swap.startAnimation(rotate);

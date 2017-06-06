@@ -65,6 +65,9 @@ public class CameraActivity extends AppCompatActivity {
         Button back = (Button)findViewById(R.id.button_back);
         back.bringToFront();
 
+        Button swap= (Button) findViewById(R.id.button_swap);
+        swap.bringToFront();
+
 
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away

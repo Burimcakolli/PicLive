@@ -34,6 +34,7 @@
             android:layout_gravity="bottom|center"
             android:layout_marginBottom="20dp"
             android:background="@drawable/rounded_button"
+            android:onClick="takePic"
             />
         <Button
             android:id="@+id/button_back"
@@ -60,6 +61,14 @@
             android:layout_gravity="bottom|left"
             android:layout_marginBottom="40dp"
             android:background="@drawable/ic_flash_off_black_24dp" />
+        <ProgressBar
+            android:id="@+id/loadingCircle"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:progressDrawable="@color/white"
+            android:layout_gravity="bottom|center"
+            android:layout_marginBottom="20dp"
+            android:indeterminate="true" />
     </FrameLayout>
 
 </FrameLayout>

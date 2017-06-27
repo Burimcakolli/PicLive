@@ -2,12 +2,19 @@ package cakhen.piclive;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.os.Environment;
 import android.util.Log;
+import android.view.Display;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -15,8 +22,12 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import static android.R.attr.width;
+import static android.content.Context.WINDOW_SERVICE;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
+import static cakhen.piclive.R.attr.height;
 
 /**
  * Created by Toshiki on 30.05.2017.
@@ -25,6 +36,7 @@ import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 @SuppressWarnings("deprecation")
 class CameraPreview extends SurfaceView implements SurfaceHolder.Callback, Camera.PictureCallback {
     File file;
+    private File pictureFile;
     int currentCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
     private SurfaceHolder mHolder;
     private Camera mCamera;
@@ -51,7 +63,7 @@ class CameraPreview extends SurfaceView implements SurfaceHolder.Callback, Camer
             @Override
             public void onPictureTaken(byte[] data, Camera camera) {
 
-                File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
+                pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
                 if (pictureFile == null){
                     Throwable e = new Exception();
                     Log.d(TAG, "Error creating media file, check storage permissions: " +
@@ -69,7 +81,36 @@ class CameraPreview extends SurfaceView implements SurfaceHolder.Callback, Camer
                     Log.d(TAG, "File not found: " + e.getMessage());
                 } catch (IOException e) {
                     Log.d(TAG, "Error accessing file: " + e.getMessage());
+                }finally {
+                    rotateImage();
                 }
+            }
+
+            private void rotateImage() {
+                String photopath = pictureFile.getPath().toString();
+                Bitmap bmp = BitmapFactory.decodeFile(photopath);
+
+                Matrix matrix = new Matrix();
+                if(bmp.getWidth() > bmp.getHeight()){
+                    matrix.postRotate(90);
+                }
+                bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+
+                FileOutputStream fOut;
+                try {
+                    fOut = new FileOutputStream(pictureFile);
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
+                    fOut.flush();
+                    fOut.close();
+
+                } catch (FileNotFoundException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
             }
         };
 
@@ -79,36 +120,64 @@ class CameraPreview extends SurfaceView implements SurfaceHolder.Callback, Camer
     public void surfaceCreated(SurfaceHolder holder) {
         try {
 
-            mCamera.setDisplayOrientation(90);
+
             // Setting BestPreviewSize for Current Pixels
-            Camera.Parameters p = mCamera.getParameters();
-            if (p.getSupportedFocusModes().contains(
-                    Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
-                p.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+            if(mCamera == null){
+                return;
+            }else{
+                Display display = ((WindowManager) activity.getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
+
+                Camera.Parameters p = mCamera.getParameters();
+                if (p.getSupportedFocusModes().contains(
+                        Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+                    p.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+                }
+                if(display.getRotation() == Surface.ROTATION_0)
+                {
+                    p.setPreviewSize(height, width);
+                    mCamera.setDisplayOrientation(90);
+                }
+
+                if(display.getRotation() == Surface.ROTATION_90)
+                {
+                    p.setPreviewSize(width, height);
+                }
+
+                if(display.getRotation() == Surface.ROTATION_180)
+                {
+                    p.setPreviewSize(height, width);
+                }
+
+                if(display.getRotation() == Surface.ROTATION_270)
+                {
+                    p.setPreviewSize(width, height);
+                    mCamera.setDisplayOrientation(180);
+                }
+                Camera.Size size;
+                List<Camera.Size> list = p.getSupportedPreviewSizes();
+                try{
+                    p.setJpegQuality(100);
+                }catch(NullPointerException e){
+                    Log.d("Nullpointer", e.getMessage());
+                }
+
+                size = list.get(0);
+
+                for(int i = 1; i < list.size(); i++) {
+                    if((list.get(i).width * list.get(i).height) > (size.width * size.height))
+                        size = list.get(i);
+                }
+                if(size != null) {
+                    p.setPreviewSize(size.width, size.height);
+
+                }
+
+                mCamera.setParameters(p);
+                mCamera.startPreview();
+                mCamera.setPreviewDisplay(holder);
+                mCamera.startPreview();
             }
-            Camera.Size size;
-            List<Camera.Size> list = p.getSupportedPreviewSizes();
-            try{
-                p.setJpegQuality(100);
-            }catch(Exception ignored){
 
-            }
-
-            size = list.get(0);
-
-            for(int i = 1; i < list.size(); i++) {
-                if((list.get(i).width * list.get(i).height) > (size.width * size.height))
-                    size = list.get(i);
-            }
-            if(size != null) {
-                p.setPreviewSize(size.width, size.height);
-
-            }
-
-            mCamera.setParameters(p);
-            mCamera.startPreview();
-            mCamera.setPreviewDisplay(holder);
-            mCamera.startPreview();
         } catch (IOException e) {
             //Log.d(TAG, "Error setting camera preview: " + e.getMessage());
         }
@@ -121,7 +190,6 @@ class CameraPreview extends SurfaceView implements SurfaceHolder.Callback, Camer
 
     public void createPicture(){
         mCamera.takePicture(null, null, mPicture);
-        mCamera.startPreview();
 }
 
     @Override
@@ -230,4 +298,5 @@ class CameraPreview extends SurfaceView implements SurfaceHolder.Callback, Camer
     public void onPictureTaken(byte[] data, Camera camera) {
 
     }
+
 }

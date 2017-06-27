@@ -159,7 +159,6 @@ public class CameraActivity extends AppCompatActivity {
             params.setPictureSize(size.width, size.height);
             //automatischer Fokus
             params.setFocusMode(FOCUS_MODE_CONTINUOUS_PICTURE);
-            params.setSceneMode(WHITE_BALANCE_AUTO);
             mCamera.setParameters(params);
             mCamera.startPreview();
         }catch (Exception e){

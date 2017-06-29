@@ -51,6 +51,13 @@ public class ImageActivity extends AppCompatActivity {
                 byte[] image = createByteFromImage();
                 PostConnection postConnection = new PostConnection();
                 //postConnection.postPicture(picName.getText().toString(), image,  8.538114,47.365003, "Zürich");
+                try {
+                    postConnection.register( );
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
             }
         };

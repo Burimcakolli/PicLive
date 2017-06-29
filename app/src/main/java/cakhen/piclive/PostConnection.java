@@ -15,6 +15,7 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
+import cakhen.piclive.models.Globals;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -49,20 +50,20 @@ public class PostConnection {
     public void register() throws IOException, JSONException {
         // Create a new HttpClient and Post Header
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("Username", "Testuserp");
-        jsonObject.put("Password", "Testuserp");
-        jsonObject.put("ConfirmPassword", "Testuserp");
+        jsonObject.put("Username", "LUEGBRAAAAH");
+        jsonObject.put("Password", "Testuserp1234");
+        jsonObject.put("ConfirmPassword", "Testuserp1234");
 
         RequestBody body = RequestBody.create(FORM, String.valueOf(jsonObject));
         Request request = new Request.Builder()
-                .url("http://10.4.57.223/PicLive/API/account/register")
+                .url(Globals.API+"account/register")
                 .post(body)
                 .build();
         Response response = client.newCall(request).execute();
         if (!response.isSuccessful()){
             throw new IOException("Unexpected code " + response);
         }
-        System.out.println(response.body().string());
+        Log.d("POST:", response.body().string());
     }
 }
 

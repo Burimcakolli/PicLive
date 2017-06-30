@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 
+import java.util.Objects;
+
 import cakhen.piclive.fragments.FeedFragment;
 
 public class PicLiveActivity extends AppCompatActivity {
@@ -48,10 +50,20 @@ public class PicLiveActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_pic_live);
 
+        setContentView(R.layout.activity_pic_live);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        //TokenSaver.setToken(getApplicationContext(), "");
+        Log.d(TAG, TokenSaver.getToken(getApplicationContext()));
+
+       if(TokenSaver.getToken(getApplicationContext()) == null | Objects.equals(TokenSaver.getToken(getApplicationContext()), "")){
+            Intent i_login = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(i_login);
+            finish();
+        }
+
     }
 
 }

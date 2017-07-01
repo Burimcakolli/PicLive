@@ -24,6 +24,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +34,7 @@ import static android.hardware.Camera.Parameters.WHITE_BALANCE_AUTO;
 
 @SuppressWarnings("deprecation")
 public class CameraActivity extends AppCompatActivity {
+
     Camera mCamera;
     FrameLayout preview;
     CameraPreview mPreview;
@@ -49,10 +51,6 @@ public class CameraActivity extends AppCompatActivity {
         setContentView(R.layout.activity_camera);
 
         findViewById(R.id.loadingCircle).setVisibility(View.GONE);
-        int hasPerm = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        if (hasPerm != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1234);
-        }
 
         mCamera = getCameraInstance(0);
         mCamera.setDisplayOrientation(90);
@@ -78,32 +76,49 @@ public class CameraActivity extends AppCompatActivity {
         ProgressBar load = (ProgressBar) findViewById(R.id.loadingCircle);
         load.bringToFront();
         load.getIndeterminateDrawable().setColorFilter(Color.WHITE, PorterDuff.Mode.MULTIPLY);
+        TextView text = (TextView)findViewById(R.id.bearbeitungstext);
+        text.bringToFront();
 
     }
 
     public void takePic(View view) {
-        Animation fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.your_fade_in_anim);
-        preview.startAnimation(fadeInAnimation);
-        mPreview.createPicture();
-        findViewById(R.id.loadingCircle).setVisibility(View.VISIBLE);
-        findViewById(R.id.button_capture).setVisibility(View.GONE);
-        loadPictureFullScreen();
+        try{
+
+            mPreview.createPicture();
+
+        }catch(Exception e){
+
+        }finally {
+            loadPictureFullScreen();
+        }
+
+
     }
 
     private void loadPictureFullScreen() {
-        final int interval = 800; // 300 Millisekunden
-        Handler handler = new Handler();
-        Runnable runnable = new Runnable(){
+        findViewById(R.id.loadingCircle).setVisibility(View.VISIBLE);
+        findViewById(R.id.overlay).setVisibility(View.VISIBLE);
+        findViewById(R.id.bearbeitungstext).setVisibility(View.VISIBLE);
+        findViewById(R.id.button_capture).setVisibility(View.GONE);
+        findViewById(R.id.button_back).setVisibility(View.GONE);
+        findViewById(R.id.button_swap).setVisibility(View.GONE);
+        findViewById(R.id.flash).setVisibility(View.GONE);
+        Thread thread = new Thread() {
+            @Override
             public void run() {
                 try {
+                    while (!mPreview.pictureRotated){
+
+                    }
                     path = mPreview.getFile().getAbsolutePath();
+                    Log.d("Bild gefunden", path);
                     showPicutreFullSize(path);
                 }catch (Exception e){
 
                 }
             }
         };
-        handler.postDelayed(runnable, interval);
+        thread.start();
     }
 
     @Override
@@ -182,4 +197,6 @@ public class CameraActivity extends AppCompatActivity {
 
 
     }
+
+
 }

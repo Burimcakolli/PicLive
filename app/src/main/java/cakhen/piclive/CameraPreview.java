@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.os.Environment;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
@@ -35,6 +36,7 @@ import static cakhen.piclive.R.attr.height;
  */
 @SuppressWarnings("deprecation")
 class CameraPreview extends SurfaceView implements SurfaceHolder.Callback, Camera.PictureCallback {
+    boolean pictureRotated = false;
     File file;
     private File pictureFile;
     int currentCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
@@ -62,54 +64,68 @@ class CameraPreview extends SurfaceView implements SurfaceHolder.Callback, Camer
 
             @Override
             public void onPictureTaken(byte[] data, Camera camera) {
+                        mCamera.stopPreview();
+                        pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
+                        if (pictureFile == null){
+                            Throwable e = new Exception();
+                            Log.d(TAG, "Error creating media file, check storage permissions: " +
+                                    e.getMessage());
+                            return;
+                        }
 
-                pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
-                if (pictureFile == null){
-                    Throwable e = new Exception();
-                    Log.d(TAG, "Error creating media file, check storage permissions: " +
-                            e.getMessage());
-                    return;
-                }
+                        try {
+                            FileOutputStream fos = new FileOutputStream(pictureFile);
+                            fos.write(data);
+                            fos.close();
+                            setFile(pictureFile);
 
-                try {
-                    FileOutputStream fos = new FileOutputStream(pictureFile);
-                    fos.write(data);
-                    fos.close();
-                    setFile(pictureFile);
+                        } catch (FileNotFoundException e) {
+                            Log.d(TAG, "File not found: " + e.getMessage());
+                        } catch (IOException e) {
+                            Log.d(TAG, "Error accessing file: " + e.getMessage());
+                        }finally {
 
-                } catch (FileNotFoundException e) {
-                    Log.d(TAG, "File not found: " + e.getMessage());
-                } catch (IOException e) {
-                    Log.d(TAG, "Error accessing file: " + e.getMessage());
-                }finally {
-                    rotateImage();
-                }
+                            rotateImage();
+                        }
+
             }
 
             private void rotateImage() {
-                String photopath = pictureFile.getPath().toString();
-                Bitmap bmp = BitmapFactory.decodeFile(photopath);
+                Thread thread = new Thread() {
+                    @Override
+                    public void run() {
+                        String photopath = pictureFile.getPath().toString();
+                        Bitmap bmp = BitmapFactory.decodeFile(photopath);
 
-                Matrix matrix = new Matrix();
-                if(bmp.getWidth() > bmp.getHeight()){
-                    matrix.postRotate(90);
-                }
-                bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+                        Matrix matrix = new Matrix();
+                        if(bmp.getWidth() > bmp.getHeight() && currentCameraId == Camera.CameraInfo.CAMERA_FACING_BACK){
+                            matrix.postRotate(90);
+                        }
+                        if(bmp.getWidth() > bmp.getHeight() && currentCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT){
+                            matrix.postRotate(-90);
+                        }
+                        bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
 
-                FileOutputStream fOut;
-                try {
-                    fOut = new FileOutputStream(pictureFile);
-                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
-                    fOut.flush();
-                    fOut.close();
+                        FileOutputStream fOut;
+                        try {
+                            fOut = new FileOutputStream(pictureFile);
+                            bmp.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
+                            Log.d("BILD WURDE GEDREHT", bmp.toString());
+                            fOut.flush();
+                            fOut.close();
+                            pictureRotated = true;
 
-                } catch (FileNotFoundException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                        } catch (FileNotFoundException e1) {
+                            // TODO Auto-generated catch block
+                            e1.printStackTrace();
+                        } catch (IOException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                    }
+                };
+                thread.start();
+
 
             }
         };
@@ -189,7 +205,14 @@ class CameraPreview extends SurfaceView implements SurfaceHolder.Callback, Camer
     }
 
     public void createPicture(){
-        mCamera.takePicture(null, null, mPicture);
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                mCamera.takePicture(null, null, mPicture);
+            }
+        };
+        thread.start();
+
 }
 
     @Override

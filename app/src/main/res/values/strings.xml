@@ -20,6 +20,7 @@
     <string name="action_sign_in_short">Sign in</string>
     <string name="regist">Not have an account? Register</string>
     <string name="register">Register</string>
+    <string name="logout">Log Out</string>
     <string name="backtologin">Back to Login</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>

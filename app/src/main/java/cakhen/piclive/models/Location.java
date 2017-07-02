@@ -19,6 +19,11 @@ import java.util.Locale;
 
 public class Location {
     android.location.Location location;
+
+    public double Lng = 0;
+    public double Lat = 0;
+    public String City = null;
+
     public Location(Context context) {
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         // get the last know location from your location manager.
@@ -33,33 +38,28 @@ public class Location {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        try{
-            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            // now get the lat/lon from the location and do something with it.
-            Log.d("TRINN", "IST TRINN");
-            Log.d("Ortschaft", location.getLatitude() + " " + location.getLongitude());
-        }catch(Exception e){
-
-        }finally{
-            getLocationName(location.getLatitude(), location.getLongitude(), context);
-        }
-
-
-
+        location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        // now get the lat/lon from the location and do something with it.
+        Log.d("TRINN", "IST TRINN");
+        Log.d("Ortschaft", location.getLatitude() + " " + location.getLongitude());
+        Lat = location.getLatitude();
+        Lng = location.getLongitude();
+        City = getLocationName(location.getLatitude(), location.getLongitude(), context);
     }
 
-    public void getLocationName(double latitude, double longitude, Context context){
+    private String getLocationName(double latitude, double longitude, Context context){
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         try {
             List<Address> listAddresses = geocoder.getFromLocation(latitude, longitude, 1);
             if(null!=listAddresses&&listAddresses.size()>0){
                 String _Location = listAddresses.get(0).getLocality();
                 Log.d("Location", _Location);
+                return _Location;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        return null;
     }
 }
 

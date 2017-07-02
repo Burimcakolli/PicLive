@@ -8,11 +8,16 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import java.util.Objects;
+
 public class PicLiveActivity extends AppCompatActivity {
+    public static String INFOTYPE = "PicLiveActivity";
     private final int MY_PERMISSIONS_REQUEST = 0;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -51,6 +56,16 @@ public class PicLiveActivity extends AppCompatActivity {
         setContentView(R.layout.activity_pic_live);
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        Log.d(INFOTYPE, TokenSaver.getToken(getApplicationContext()));
+        //TokenSaver.setToken(getApplicationContext(), ""); Just for Testing Login
+
+        if(TokenSaver.getToken(getApplicationContext()) == null | Objects.equals(TokenSaver.getToken(getApplicationContext()), "")){
+            Intent i_login = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(i_login);
+            finish();
+        }
+
     }
 
     @Override

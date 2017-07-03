@@ -38,13 +38,17 @@ public class Location {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        //location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         // now get the lat/lon from the location and do something with it.
-        Log.d("TRINN", "IST TRINN");
-        Log.d("Ortschaft", location.getLatitude() + " " + location.getLongitude());
-        Lat = location.getLatitude();
-        Lng = location.getLongitude();
-        City = getLocationName(location.getLatitude(), location.getLongitude(), context);
+        //Log.d("TRINN", "IST TRINN");
+        //Log.d("Ortschaft", location.getLatitude() + " " + location.getLongitude());
+        //Lat = location.getLatitude();
+        //Lng = location.getLongitude();
+        //City = getLocationName(location.getLatitude(), location.getLongitude(), context);
+        Lat = 47.837383;
+        Lng = 8.7636363;
+        City = "City";
+
     }
 
     private String getLocationName(double latitude, double longitude, Context context){

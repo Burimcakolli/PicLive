@@ -7,14 +7,17 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 import java.util.Objects;
+
+import cakhen.piclive.fragments.FeedFragment;
+
 
 public class PicLiveActivity extends AppCompatActivity {
     public static String INFOTYPE = "PicLiveActivity";
@@ -25,9 +28,11 @@ public class PicLiveActivity extends AppCompatActivity {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            Fragment fragment = null;
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    return true;
+                    fragment = new FeedFragment();
+                    break;
                 case R.id.navigation_dashboard:
                     int hasPermCamera = ContextCompat.checkSelfPermission(PicLiveActivity.this, Manifest.permission.CAMERA);
                     int hasPermLocation = ContextCompat.checkSelfPermission(PicLiveActivity.this, Manifest.permission.ACCESS_FINE_LOCATION);
@@ -43,9 +48,18 @@ public class PicLiveActivity extends AppCompatActivity {
 
                     return true;
                 case R.id.navigation_notifications:
-                    return true;
+
+                    break;
             }
-            return false;
+            if (fragment != null) {
+                getSupportFragmentManager().beginTransaction().replace(
+                        R.id.fragmentContainer, fragment)
+                        .commit();
+                //Log.println(Log.DEBUG, TAG, "click " + item.getTitle());
+                return true;
+            } else {
+                return false;
+            }
         }
 
     };
@@ -65,6 +79,10 @@ public class PicLiveActivity extends AppCompatActivity {
             startActivity(i_login);
             finish();
         }
+
+        getSupportFragmentManager().beginTransaction().replace(
+                R.id.fragmentContainer, new FeedFragment())
+                .commit();
 
     }
 

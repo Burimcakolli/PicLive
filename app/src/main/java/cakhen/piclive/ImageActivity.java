@@ -51,7 +51,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class ImageActivity extends AppCompatActivity {
-    public static final MediaType FORM = MediaType.parse("application/json; charset=utf-8");
+    public static final MediaType FORM = MediaType.parse("application/json");
 
     ImageView imageView;
     Drawable d;
@@ -142,7 +142,7 @@ public class ImageActivity extends AppCompatActivity {
         //Log.d("Filepath", path);
         //Bitmap compressed = Bitmap.createScaledBitmap(bitmap, 2560, 1440, false);
         ByteArrayOutputStream baos=new  ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG,100, baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,75, baos);
         //Log.d("sizebaos: ", baos.size() + "");
         byte[] b = baos.toByteArray();
         //
@@ -152,24 +152,26 @@ public class ImageActivity extends AppCompatActivity {
         return temp;
     }
 
+
+
     private Response PostPicture(PictureUploadDTO Upload){
         // Create a new HttpClient and Post Header
         Log.d("NAME", Upload.Name);
         Log.d("City", Upload.City);
         Log.d("Lat", Upload.Lat + "");
         Log.d("Lng", Upload.Lng + "");
-        Log.d("IMAGE", Upload.Image);
+        //Log.d("IMAGE", Upload.Image);
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("name", Upload.Name);
-            jsonObject.put("image",base64);
+            jsonObject.put("image", base64);
             jsonObject.put("lng", String.valueOf(Upload.Lng));
             jsonObject.put("lat", String.valueOf(Upload.Lat));
             jsonObject.put("city", Upload.City);
             Log.d("Json-Object", String.valueOf(jsonObject));
             Log.d("Correct Base64", base64);
-            RequestBody body = RequestBody.create(FORM, "" +"{Name:" + Upload.Name + " , Image:" + jsonObject.get("image") +", Lng: "+ Upload.Lng +", Lat: "+ Upload.Lat +", City:"+ Upload.City +"}");
-            Log.d("Requestbody", jsonObject.get("image") +"");
+            RequestBody body = RequestBody.create(FORM, jsonObject.toString());
+            //Log.d("Requestbody", jsonObject.get("image") +"");
             Request request = new Request.Builder()
                     .header("Authorization", TokenSaver.getToken(getApplicationContext()))
                     .url(Globals.API + "Pictures")
@@ -206,6 +208,12 @@ public class ImageActivity extends AppCompatActivity {
             }
             else{
                 backToPicture();
+                try {
+                    Log.d("Fail Message", http_response.message().toString());
+                    Log.d("Fail Body", http_response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 Toast.makeText(getApplicationContext(), "FAIL! Something unusual happened", Toast.LENGTH_SHORT).show();
             }
         }

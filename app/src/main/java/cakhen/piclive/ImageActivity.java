@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -52,7 +53,7 @@ import okhttp3.Response;
 
 public class ImageActivity extends AppCompatActivity {
     public static final MediaType FORM = MediaType.parse("application/json");
-
+    Location location;
     ImageView imageView;
     Drawable d;
     EditText picName;
@@ -68,7 +69,7 @@ public class ImageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getSupportActionBar().hide();
-
+        location = new Location(getApplicationContext());
         super.onCreate(savedInstanceState);
 
         Window window = getWindow();
@@ -152,7 +153,14 @@ public class ImageActivity extends AppCompatActivity {
         return temp;
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            Home();
 
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
     private Response PostPicture(PictureUploadDTO Upload){
         // Create a new HttpClient and Post Header
@@ -240,7 +248,7 @@ public class ImageActivity extends AppCompatActivity {
         @Override
         protected Location doInBackground(Void... params) {
             // TODO Auto-generated method stub
-            return new Location(getApplicationContext());
+            return location;
         }
 
         protected void onPostExecute(Location Location){

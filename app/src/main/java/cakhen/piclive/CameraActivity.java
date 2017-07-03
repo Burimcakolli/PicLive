@@ -15,6 +15,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.animation.Animation;
@@ -181,6 +182,8 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
+
+
     public void showPicutreFullSize(String path){
         try{
             if(path.equals("") || path == null){
@@ -189,6 +192,7 @@ public class CameraActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, ImageActivity.class);
                 intent.putExtra("pathName", path);
                 startActivity(intent);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
             }
         }catch (Exception e) {

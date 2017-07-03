@@ -220,7 +220,7 @@ public class ImageActivity extends AppCompatActivity {
 
     }
 
-    public void generateNoteOnSD(Context context, String sFileName, String sBody) {
+    /*public void generateNoteOnSD(Context context, String sFileName, String sBody) {
         try {
             File root = new File(Environment.getExternalStorageDirectory(), "Notes");
             if (!root.exists()) {
@@ -234,7 +234,7 @@ public class ImageActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     private class GetLocationAsyncTask extends AsyncTask<Void, Void, Location> {
         @Override

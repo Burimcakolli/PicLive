@@ -1,16 +1,16 @@
 package cakhen.piclive;
 
-import android.content.Context;
+import android.Manifest;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.Environment;
-import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
@@ -22,29 +22,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import cakhen.piclive.models.Globals;
-import cakhen.piclive.models.Location;
 import cakhen.piclive.models.LocationDTO;
 import cakhen.piclive.models.PictureUploadDTO;
-import cakhen.piclive.models.UserRegisterDTO;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -53,7 +44,6 @@ import okhttp3.Response;
 
 public class ImageActivity extends AppCompatActivity {
     public static final MediaType FORM = MediaType.parse("application/json");
-    Location location;
     ImageView imageView;
     Drawable d;
     EditText picName;
@@ -69,7 +59,6 @@ public class ImageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getSupportActionBar().hide();
-        location = new Location(getApplicationContext());
         super.onCreate(savedInstanceState);
 
         Window window = getWindow();
@@ -244,14 +233,52 @@ public class ImageActivity extends AppCompatActivity {
         }
     }*/
 
-    private class GetLocationAsyncTask extends AsyncTask<Void, Void, Location> {
+    private class GetLocationAsyncTask extends AsyncTask<Void, Void, LocationDTO> {
         @Override
-        protected Location doInBackground(Void... params) {
-            // TODO Auto-generated method stub
-            return location;
+        protected LocationDTO doInBackground(Void... params) {
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+            }
+            Log.d("INFO", "START");
+            LocationManager mLocationManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
+            List<String> providers = mLocationManager.getProviders(true);
+            android.location.Location bestLocation = null;
+            for (String provider : providers) {
+                android.location.Location l = mLocationManager.getLastKnownLocation(provider);
+                if (l == null) {
+                    continue;
+                }
+                if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                    // Found best last known location: %s", l);
+                    bestLocation = l;
+                }
+            }
+            Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+            List<Address> listAddresses = null;
+            try {
+                listAddresses = geocoder.getFromLocation(bestLocation.getLatitude(), bestLocation.getLongitude(), 1);
+                if (null != listAddresses && listAddresses.size() > 0) {
+                    String _Location = listAddresses.get(0).getLocality();
+                    Log.d("Location", _Location);
+                    return new LocationDTO(bestLocation.getLongitude(), bestLocation.getLatitude(), _Location);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
         }
 
-        protected void onPostExecute(Location Location){
+        protected void onPostExecute(LocationDTO Location){
+            Log.d("VAR", Location.Lng + "" );
+            Log.d("VAR", Location.Lat + "");
+            Log.d("VAR", Location.City);
+
             if(Location.Lng != 0 && Location.Lat != 0 && Location.City != null){
                 MyLocationDTO = new LocationDTO(Location.Lng, Location.Lat, Location.City);
                 new UploadPictureAsyncTask().execute(

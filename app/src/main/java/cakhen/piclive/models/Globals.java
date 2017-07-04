@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 public class Globals {
 
-    public static String HOST = "http://192.168.0.129";
+    public static String HOST = "http://192.168.43.149";
     public static String URL = HOST+":80/PicLive/";
     //public static String URL = HOST+":52510/";
     public static String API = URL+"API/";

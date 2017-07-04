@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -26,6 +28,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import cakhen.piclive.PictureAdapter;
 import cakhen.piclive.R;
 import cakhen.piclive.models.Globals;
 import cakhen.piclive.models.PictureDTO;
@@ -44,8 +47,9 @@ import okhttp3.Response;
  */
 public class FeedFragment extends Fragment {
     public static final MediaType FORM = MediaType.parse("application/json");
-    public List<PictureDTO> FeedList = new ArrayList<PictureDTO>();
+    public ArrayList<PictureDTO> FeedList = new ArrayList<PictureDTO>();
     public ProgressBar LoadingCircle;
+    public ListView listView1;
 
     private OkHttpClient client;
 
@@ -61,7 +65,12 @@ public class FeedFragment extends Fragment {
                 .writeTimeout(800, TimeUnit.SECONDS)
                 .readTimeout(800, TimeUnit.SECONDS)
                 .build();
+
         new DownloadFeedsTask().execute();
+
+        //FeedList = new ArrayList<PictureDTO>();
+        //FeedList.add(new PictureDTO(1, "Name", "Image", 47.894794, 8.389383, "City", 6, "HEUTE"));
+        //FeedList.add(new PictureDTO(2, "Name", "Image", 47.894794, 8.389383, "City", 6, "HEUTE2"));
         return view;
     }
 
@@ -84,26 +93,26 @@ public class FeedFragment extends Fragment {
         return null;
     }
 
-    private class DownloadFeedsTask extends AsyncTask<Void, Integer, List<PictureDTO>> {
-        protected List<PictureDTO> doInBackground(Void... params) {
+    private class DownloadFeedsTask extends AsyncTask<Void, Integer, ArrayList<PictureDTO>> {
+        protected ArrayList<PictureDTO> doInBackground(Void... params) {
             Response responses = LoadPictures();
             String jsonData = null;
             try {
                 jsonData = responses.body().string();
                 Log.d("Feed", jsonData);
                 JSONArray jsonArr = new JSONArray(jsonData);
-                List<PictureDTO> pictures = new ArrayList<>();
+                ArrayList<PictureDTO> pictures = new ArrayList<PictureDTO>();
                 for (int i = 0; i < jsonArr.length(); i++) {
                     JSONObject jsonObj = jsonArr.getJSONObject(i);
                     PictureDTO pictureDTO = new PictureDTO(
-                            jsonObj.getInt("PicImageId"),
-                            jsonObj.getString("Name"),
-                            Base64.decode(jsonObj.getString("Name"), Base64.DEFAULT),
-                            jsonObj.getDouble("Lng"),
-                            jsonObj.getDouble("Lat"),
-                            jsonObj.getString("City"),
-                            jsonObj.getInt("Likes"),
-                            jsonObj.getString("CreationDate")
+                            jsonObj.getInt("picImageId"),
+                            jsonObj.getString("name"),
+                            jsonObj.getString("image"),
+                            jsonObj.getDouble("lng"),
+                            jsonObj.getDouble("lat"),
+                            jsonObj.getString("city"),
+                            jsonObj.getInt("likes"),
+                            jsonObj.getString("creationDate")
                     );
                     pictures.add(pictureDTO);
                 }
@@ -113,12 +122,19 @@ public class FeedFragment extends Fragment {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            return null;
+            return new ArrayList<PictureDTO>();
         }
 
-        protected void onPostExecute(List<PictureDTO> result) {
+        protected void onPostExecute(ArrayList<PictureDTO> result) {
             LoadingCircle.setVisibility(View.GONE);
             FeedList = result;
+            Log.d("INFO", FeedList.toString());
+
+            PictureAdapter adapter = new PictureAdapter(getContext(),
+                    R.layout.picfeed_row, FeedList);
+
+            listView1 = (ListView) getView().findViewById(R.id.listView1);
+            listView1.setAdapter(adapter);
             Toast.makeText(getActivity(), "Loading succeed", Toast.LENGTH_SHORT).show();
         }
     }

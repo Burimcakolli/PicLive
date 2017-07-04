@@ -9,14 +9,14 @@ import java.util.Date;
 public class PictureDTO {
     public int PicImageId;
     public String Name;
-    public byte[] Image;
+    public String Image;
     public double Lng;
     public double Lat;
     public String City;
     public int Likes;
     public String CreationDate;
 
-    public PictureDTO(int picImageId, String name, byte[] image, double lng, double lat, String city, int likes, String creationDate) {
+    public PictureDTO(int picImageId, String name, String image, double lng, double lat, String city, int likes, String creationDate) {
         PicImageId = picImageId;
         Name = name;
         Image = image;

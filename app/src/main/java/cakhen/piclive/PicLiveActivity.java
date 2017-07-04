@@ -47,9 +47,6 @@ public class PicLiveActivity extends AppCompatActivity {
                     }
 
                     return true;
-                case R.id.navigation_notifications:
-
-                    break;
             }
             if (fragment != null) {
                 getSupportFragmentManager().beginTransaction().replace(
